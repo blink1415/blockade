@@ -7,8 +7,8 @@ const FPS: u32 = 8;
 const SQ_SIZE: usize = 26;
 
 mod logic;
-use logic::components::*;
-use logic::*;
+use logic::components::{Direction, Entity};
+use logic::Game;
 
 pub struct Blockade {
     g: Game,
@@ -46,6 +46,24 @@ impl Entity {
     }
 }
 
+impl logic::components::Log {
+    fn draw(&self, ctx: &mut Context) -> GameResult<()> {
+        let font = graphics::Font::new(ctx, "/LiberationMono-Regular.ttf")?;
+        let score = self.get_score();
+        let scoreboard = format!("P1:   {}\nDraw: {}\nP2:   {}", score[0], score[1], score[2]);
+        let txt = graphics::Text::new((scoreboard, font, 48.0));
+        graphics::draw(
+            ctx,
+            &txt,
+            (
+                ggez::mint::Point2 { x: 575.0, y: 50.0 },
+                graphics::Color::BLACK,
+            ),
+        )?;
+        Ok(())
+    }
+}
+
 impl EventHandler<ggez::GameError> for Blockade {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         while timer::check_update_time(ctx, FPS) {
@@ -58,15 +76,14 @@ impl EventHandler<ggez::GameError> for Blockade {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, Color::WHITE);
-        // Draw code here...
-        //println!("{}", self.g.print_map());
-        //print!("{}[2J", 27 as char);
 
         for y in 0..self.g.map.len() {
             for x in 0..self.g.map[0].len() {
                 self.g.map[y][x].draw(ctx, x, y)?
             }
         }
+
+        self.g.gamelog.draw(ctx)?;
 
         graphics::present(ctx)?;
         Ok(())

@@ -45,8 +45,8 @@ impl Game {
             },
         };
 
-        let p1_start = Position { x: 5, y: 5 };
-        let p2_start = Position { x: w - 6, y: h - 5 };
+        let p1_start = Position { x: w - 6, y: h - 5 };
+        let p2_start = Position { x: 5, y: 5 };
 
         map[p1_start.y][p1_start.x] = Entity::Player(p1);
         map[p2_start.y][p2_start.x] = Entity::Player(p2);
@@ -91,8 +91,8 @@ impl Game {
             },
         };
 
-        let p1_start = Position { x: 5, y: 5 };
-        let p2_start = Position { x: w - 6, y: h - 5 };
+        let p1_start = Position { x: w - 6, y: h - 5 };
+        let p2_start = Position { x: 5, y: 5 };
 
         map[p1_start.y][p1_start.x] = Entity::Player(p1);
         map[p2_start.y][p2_start.x] = Entity::Player(p2);
@@ -176,7 +176,11 @@ impl Game {
                 x: p1_next.x,
                 y: p1_next.y,
             };
-            self.map[y1][x1] = Entity::Path(Path(p1.color));
+            let mut path_color = p1.color;
+            path_color.r *= 0.8;
+            path_color.g *= 0.8;
+            path_color.b *= 0.8;
+            self.map[y1][x1] = Entity::Path(Path(path_color));
             /*
             // Move p2
             self.map[p2_next.y][p2_next.x] = Entity::Player(p2);
