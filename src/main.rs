@@ -11,6 +11,7 @@ fn main() {
 }
 
 fn run_ggez() {
+    // Resource path
     let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources");

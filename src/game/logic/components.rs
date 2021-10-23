@@ -92,7 +92,9 @@ impl Log {
 #[derive(Copy, Clone, Debug)]
 pub struct Player {
     pub dir: Direction,
+    pub last_dir: Direction,
     pub color: Color,
+    pub paused: bool,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -107,7 +109,7 @@ pub enum Entity {
 }
 
 impl Entity {
-    pub fn unwrap(&mut self) -> &mut Player {
+    pub fn copy(&mut self) -> &mut Player {
         match self {
             Entity::Player(p) => p,
             _ => panic!(

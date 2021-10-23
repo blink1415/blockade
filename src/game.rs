@@ -106,10 +106,8 @@ impl EventHandler<ggez::GameError> for Blockade {
             KeyCode::A => self.g.change_dir(Direction::Left, 2),
             KeyCode::D => self.g.change_dir(Direction::Right, 2),
             KeyCode::R => self.g.reset(),
+            KeyCode::P => self.g.pause(2),
             _ => {}
-        }
-        if !self.g.running && !self.g.gameover {
-            self.g.running = true;
         }
     }
 }
