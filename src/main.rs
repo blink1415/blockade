@@ -6,6 +6,8 @@ use std::{env, path};
 mod game;
 use game::Blockade;
 
+const SQ_SIZE: usize = 30;
+
 fn main() {
     run_ggez();
 }
@@ -21,6 +23,11 @@ fn run_ggez() {
     };
 
     let (mut ctx, event_loop) = ContextBuilder::new("Blockade", "Nikolai Steen Kjosnes")
+        .window_setup(ggez::conf::WindowSetup::default().title("Blockade"))
+        .window_mode(
+            ggez::conf::WindowMode::default()
+                .dimensions((SQ_SIZE * 30) as f32, (SQ_SIZE * 22 + 10) as f32),
+        )
         .add_resource_path(resource_dir)
         .build()
         .expect("An error occurred while creating ggez context.");

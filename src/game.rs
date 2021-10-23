@@ -4,7 +4,7 @@ use ggez::graphics::{self, Color};
 use ggez::{timer, Context, GameResult};
 
 const FPS: u32 = 8;
-const SQ_SIZE: usize = 26;
+const SQ_SIZE: usize = 30;
 
 mod logic;
 use logic::components::{Direction, Entity};
@@ -22,23 +22,21 @@ impl Blockade {
 
 impl Entity {
     fn draw(&self, ctx: &mut Context, x: usize, y: usize) -> GameResult<()> {
-        let color;
-
-        match self {
-            Entity::Player(p) => color = [p.color.r, p.color.g, p.color.b, 1.0].into(),
-            Entity::Path(p) => color = [p.0.r, p.0.g, p.0.b, 1.0].into(),
-            Entity::Wall => color = [1.0, 1.0, 1.0, 1.0].into(),
-            Entity::None => color = [0.5, 0.5, 0.5, 1.0].into(),
-        }
+        let color = match self {
+            Entity::Player(p) => [p.color.r, p.color.g, p.color.b, 1.0].into(),
+            Entity::Path(p) => [p.0.r, p.0.g, p.0.b, 1.0].into(),
+            Entity::Wall => graphics::Color::BLACK,
+            Entity::None => graphics::Color::WHITE,
+        };
 
         let rectangle = graphics::Mesh::new_rectangle(
             ctx,
             graphics::DrawMode::fill(),
             ggez::graphics::Rect::new(
-                (x * SQ_SIZE) as f32,
-                (y * SQ_SIZE) as f32,
-                SQ_SIZE as f32 - 2.0,
-                SQ_SIZE as f32 - 2.0,
+                (x * SQ_SIZE) as f32 + 5.0,
+                (y * SQ_SIZE) as f32 + 5.0,
+                SQ_SIZE as f32,
+                SQ_SIZE as f32,
             ),
             color,
         )?;
@@ -56,7 +54,10 @@ impl logic::components::Log {
             ctx,
             &txt,
             (
-                ggez::mint::Point2 { x: 575.0, y: 50.0 },
+                ggez::mint::Point2 {
+                    x: (SQ_SIZE * 22 + 15) as f32,
+                    y: 25.0,
+                },
                 graphics::Color::BLACK,
             ),
         )?;
