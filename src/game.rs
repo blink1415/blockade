@@ -3,8 +3,8 @@ use ggez::event::{EventHandler, KeyCode, KeyMods};
 use ggez::graphics::{self, Color};
 use ggez::{timer, Context, GameResult};
 
-const FPS: u32 = 8;
-const SQ_SIZE: usize = 30;
+const FPS: u32 = 10;
+pub const SQ_SIZE: usize = 30;
 
 mod logic;
 use logic::components::{Direction, Entity};

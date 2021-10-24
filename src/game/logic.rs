@@ -133,16 +133,15 @@ impl Game {
         out
     }
 
-    pub fn frame_advance(&mut self) -> bool {
+    pub fn frame_advance(&mut self) {
         match Game::move_players(self) {
-            GameResult::None => false,
+            GameResult::None => { /* next frame */ }
             r => {
                 self.gamelog.0.push(r);
                 self.running = false;
                 self.gameover = true;
-                true
             }
-        }
+        };
     }
 
     fn move_players(&mut self) -> GameResult {
@@ -180,46 +179,52 @@ impl Game {
                     };
                 }
 
-                if result == GameResult::None {
-                    let color_multiplier = 0.4;
-                    // Saves direction moved this frame
-                    p1.last_dir = p1.dir;
-                    p2.last_dir = p2.dir;
+                //if result == GameResult::None {
+                let color_multiplier = 0.4;
+                // Saves direction moved this frame
+                p1.last_dir = p1.dir;
+                p2.last_dir = p2.dir;
 
-                    // Move p1
-                    if !p1.paused {
-                        self.map[p1_next.y][p1_next.x] = Entity::Player(*p1);
-                        self.p1_pos = Position {
-                            x: p1_next.x,
-                            y: p1_next.y,
-                        };
-                        let path_color = Color {
-                            r: p1.color.r * color_multiplier,
-                            g: p1.color.g * color_multiplier,
-                            b: p1.color.b * color_multiplier,
-                        };
-                        self.map[y1][x1] = Entity::Path(Path(path_color));
-                    }
-                    if !p2.paused {
-                        // Move p2
-                        self.map[p2_next.y][p2_next.x] = Entity::Player(*p2);
-                        self.p2_pos = Position {
-                            x: p2_next.x,
-                            y: p2_next.y,
-                        };
-                        let path_color = Color {
-                            r: p2.color.r * color_multiplier,
-                            g: p2.color.g * color_multiplier,
-                            b: p2.color.b * color_multiplier,
-                        };
-                        self.map[y2][x2] = Entity::Path(Path(path_color));
-                    }
+                // Move p1
+                if !p1.paused {
+                    self.map[p1_next.y][p1_next.x] = Entity::Player(*p1);
+                    self.p1_pos = Position {
+                        x: p1_next.x,
+                        y: p1_next.y,
+                    };
+                    let path_color = Color {
+                        r: p1.color.r * color_multiplier,
+                        g: p1.color.g * color_multiplier,
+                        b: p1.color.b * color_multiplier,
+                    };
+                    self.map[y1][x1] = Entity::Path(Path(path_color));
                 }
+                if !p2.paused {
+                    // Move p2
+                    self.map[p2_next.y][p2_next.x] = Entity::Player(*p2);
+                    self.p2_pos = Position {
+                        x: p2_next.x,
+                        y: p2_next.y,
+                    };
+                    let path_color = Color {
+                        r: p2.color.r * color_multiplier,
+                        g: p2.color.g * color_multiplier,
+                        b: p2.color.b * color_multiplier,
+                    };
+                    self.map[y2][x2] = Entity::Path(Path(path_color));
+                }
+                //}
             }
             _ => {
                 result = GameResult::Draw;
             }
         }
+
+        result
+    }
+
+    fn get_result(&self, p1_next: Position, p2_next: Position) -> GameResult {
+        let mut result = GameResult::None;
 
         result
     }

@@ -4,9 +4,7 @@ use ggez::ContextBuilder;
 use std::{env, path};
 
 mod game;
-use game::Blockade;
-
-const SQ_SIZE: usize = 30;
+use game::{Blockade, SQ_SIZE};
 
 fn main() {
     run_ggez();
