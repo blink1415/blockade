@@ -118,6 +118,13 @@ impl Entity {
             ),
         }
     }
+
+    pub fn update_dir(&mut self) {
+        match self {
+            Entity::Player(p) => p.last_dir = p.dir,
+            _ => {}
+        }
+    }
 }
 
 #[derive(PartialEq, Debug)]

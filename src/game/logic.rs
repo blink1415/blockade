@@ -1,6 +1,8 @@
 pub mod components;
 use components::*;
 
+const COLOR_MULTIPLIER: f32 = 0.6;
+
 pub struct Game {
     pub map: [[Entity; 22]; 22],
     pub gamelog: Log,
@@ -49,8 +51,11 @@ impl Game {
             paused: false,
         };
 
-        let p1_start = Position { x: w - 6, y: h - 5 };
-        let p2_start = Position { x: 5, y: 5 };
+        let p1_start = Position {
+            x: 7 * w / 8,
+            y: h / 2,
+        };
+        let p2_start = Position { x: w / 8, y: h / 2 };
 
         map[p1_start.y][p1_start.x] = Entity::Player(p1);
         map[p2_start.y][p2_start.x] = Entity::Player(p2);
@@ -99,8 +104,11 @@ impl Game {
             paused: false,
         };
 
-        let p1_start = Position { x: w - 6, y: h - 5 };
-        let p2_start = Position { x: 5, y: 5 };
+        let p1_start = Position {
+            x: 7 * w / 8,
+            y: h / 2,
+        };
+        let p2_start = Position { x: w / 8, y: h / 2 };
 
         map[p1_start.y][p1_start.x] = Entity::Player(p1);
         map[p2_start.y][p2_start.x] = Entity::Player(p2);
@@ -134,7 +142,9 @@ impl Game {
     }
 
     pub fn frame_advance(&mut self) {
-        match Game::move_players(self) {
+        let (p1_next, p2_next) = self.get_next_positions();
+
+        match self.get_result(p1_next, p2_next) {
             GameResult::None => { /* next frame */ }
             r => {
                 self.gamelog.0.push(r);
@@ -142,91 +152,89 @@ impl Game {
                 self.gameover = true;
             }
         };
+
+        Game::move_players(self, p1_next, p2_next);
     }
 
-    fn move_players(&mut self) -> GameResult {
-        let result: GameResult;
-
+    fn get_next_positions(&mut self) -> (Position, Position) {
         let (x1, y1) = (self.p1_pos.x, self.p1_pos.y);
         let (x2, y2) = (self.p2_pos.x, self.p2_pos.y);
 
-        match &mut (self.map[y1][x1], self.map[y2][x2]) {
+        let mut p1_next = Position { x: 0, y: 0 };
+        let mut p2_next = Position { x: 0, y: 0 };
+
+        if let Entity::Player(p1) = self.map[y1][x1] {
+            p1_next = self
+                .p1_pos
+                .new_pos(p1.dir, (self.map[0].len(), self.map.len()));
+        }
+        if let Entity::Player(p2) = self.map[y2][x2] {
+            p2_next = self
+                .p2_pos
+                .new_pos(p2.dir, (self.map[0].len(), self.map.len()));
+        }
+
+        (p1_next, p2_next)
+    }
+
+    fn move_players(&mut self, p1_next: Position, p2_next: Position) {
+        let (x1, y1) = (self.p1_pos.x, self.p1_pos.y);
+        let (x2, y2) = (self.p2_pos.x, self.p2_pos.y);
+
+        self.map[y1][x1].update_dir();
+        self.map[y2][x2].update_dir();
+
+        match (self.map[y1][x1], self.map[y2][x2]) {
             (Entity::Player(p1), Entity::Player(p2)) => {
-                let p1_next = self
-                    .p1_pos
-                    .new_pos(p1.dir, (self.map[0].len(), self.map.len()));
-                let p2_next = self
-                    .p2_pos
-                    .new_pos(p2.dir, (self.map[0].len(), self.map.len()));
-
-                if p1_next == p2_next {
-                    result = GameResult::Draw;
-                } else {
-                    match (
-                        self.map[p1_next.y][p1_next.x],
-                        self.map[p2_next.y][p2_next.x],
-                    ) {
-                        (Entity::Path(_) | Entity::Wall, Entity::None) => {
-                            result = GameResult::P2Win
-                        }
-                        (Entity::None, Entity::Path(_) | Entity::Wall) => {
-                            result = GameResult::P1Win
-                        }
-                        (Entity::Path(_) | Entity::Wall, Entity::Path(_) | Entity::Wall) => {
-                            result = GameResult::Draw
-                        }
-                        (_, _) => result = GameResult::None,
-                    };
-                }
-
-                //if result == GameResult::None {
-                let color_multiplier = 0.4;
-                // Saves direction moved this frame
-                p1.last_dir = p1.dir;
-                p2.last_dir = p2.dir;
-
-                // Move p1
                 if !p1.paused {
-                    self.map[p1_next.y][p1_next.x] = Entity::Player(*p1);
+                    self.map[p1_next.y][p1_next.x] = Entity::Player(p1);
                     self.p1_pos = Position {
                         x: p1_next.x,
                         y: p1_next.y,
                     };
                     let path_color = Color {
-                        r: p1.color.r * color_multiplier,
-                        g: p1.color.g * color_multiplier,
-                        b: p1.color.b * color_multiplier,
+                        r: p1.color.r * COLOR_MULTIPLIER,
+                        g: p1.color.g * COLOR_MULTIPLIER,
+                        b: p1.color.b * COLOR_MULTIPLIER,
                     };
                     self.map[y1][x1] = Entity::Path(Path(path_color));
                 }
+
                 if !p2.paused {
-                    // Move p2
-                    self.map[p2_next.y][p2_next.x] = Entity::Player(*p2);
+                    self.map[p2_next.y][p2_next.x] = Entity::Player(p2);
                     self.p2_pos = Position {
                         x: p2_next.x,
                         y: p2_next.y,
                     };
                     let path_color = Color {
-                        r: p2.color.r * color_multiplier,
-                        g: p2.color.g * color_multiplier,
-                        b: p2.color.b * color_multiplier,
+                        r: p2.color.r * COLOR_MULTIPLIER,
+                        g: p2.color.g * COLOR_MULTIPLIER,
+                        b: p2.color.b * COLOR_MULTIPLIER,
                     };
                     self.map[y2][x2] = Entity::Path(Path(path_color));
                 }
-                //}
             }
-            _ => {
-                result = GameResult::Draw;
-            }
+            (_, _) => panic!("Unreachable code!"),
         }
-
-        result
     }
 
     fn get_result(&self, p1_next: Position, p2_next: Position) -> GameResult {
-        let mut result = GameResult::None;
+        let p1_dead = match self.map[p1_next.y][p1_next.x] {
+            Entity::None => false,
+            _ => true,
+        };
 
-        result
+        let p2_dead = match self.map[p2_next.y][p2_next.x] {
+            Entity::None => false,
+            _ => true,
+        };
+
+        match (p1_dead, p2_dead) {
+            (true, true) => GameResult::Draw,
+            (false, true) => GameResult::P1Win,
+            (true, false) => GameResult::P2Win,
+            (false, false) => GameResult::None,
+        }
     }
 
     pub fn change_dir(&mut self, dir: Direction, player: usize) {
